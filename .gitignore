@@ -36,3 +36,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# Ignorar o arquivo de propriedades da aplicação para não expor segredos
+/src/main/resources/application.properties
