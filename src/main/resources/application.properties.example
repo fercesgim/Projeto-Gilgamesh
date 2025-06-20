@@ -1,0 +1,3 @@
+# Cole aqui sua chave da API da OpenAI para rodar o projeto.
+# Não preencha este arquivo, copie-o para "application.properties" e preencha lá.
+openai.api.key=sua_key_aqui
