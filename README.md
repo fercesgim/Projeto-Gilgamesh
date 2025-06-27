@@ -1,88 +1,104 @@
 
 ## 📄 Documentação Automática
 
-Este trecho foi gerado pelo Gilgamesh com base nos arquivos do repositório.
-
 ### src/main/java/gilgamesh/GilgameshApplication.java
-Resumo:
-Resumo:
-A classe GilgameshApplication é a classe principal da aplicação. Ela é responsável por inicializar e configurar a aplicação utilizando o framework Spring Boot. O método main é responsável por iniciar a aplicação Spring ao chamar o método SpringApplication.run(). A anotação @SpringBootApplication indica que esta classe é uma classe de configuração do Spring Boot e que a aplicação deve ser iniciada a partir dela.
+A classe `GilgameshApplication` é o ponto de entrada principal para um aplicativo Spring Boot.  Sua única responsabilidade é iniciar a aplicação. O método `main` utiliza a classe `SpringApplication` para executar o aplicativo, carregando todas as configurações e componentes definidos pela anotação `@SpringBootApplication`.  Em resumo, esta classe serve como o bootstrap da aplicação.
 
 ### src/main/java/gilgamesh/controller/DocumentationController.java
-Resumo:
-Resumo da classe DocumentationController:
+A classe `DocumentationController` é um controlador Spring que expõe dois endpoints para gerenciamento de documentação (README):
 
-- A classe é responsável por receber requisições relacionadas à geração e commit de documentação em um repositório.
-- Ela possui dois métodos POST: generateDocumentation e commitReadme, que aceitam objetos DocumentationRequest e CommitRequest, respectivamente.
-- O método generateDocumentation chama o serviço DocumentationService para gerar a documentação com base nos parâmetros recebidos na requisição.
-- O método commitReadme instancia o GitHubCommitter com as credenciais fornecidas na requisição e realiza o commit do conteúdo do README no repositório.
-- Ambos os métodos tratam exceções e retornam ResponseEntity com informações sobre o sucesso ou falha da operação.
+**Responsabilidades:**
+
+* Receber requisições relacionadas à geração e ao envio de documentação para repositórios.
+* Delegar a geração da documentação para a classe `DocumentationService`.
+* Lidar com possíveis exceções durante a geração e o envio da documentação, retornando respostas HTTP apropriadas.
+* Gerenciar o processo de commit do README atualizado no Github.
+
+**Métodos Principais:**
+
+* **`generateDocumentation(DocumentationRequest request)`:**  Este método recebe um objeto `DocumentationRequest` como entrada (provavelmente contendo informações sobre o repositório), gera a documentação utilizando o serviço `documentationService` e retorna o conteúdo do README gerado em formato String como resposta, encapsulado em um `ResponseEntity`.  Trata exceções de parâmetros inválidos e erros internos, retornando mensagens de erro adequadas.
+
+* **`commitReadme(CommitRequest request)`:** Este método recebe um objeto `CommitRequest`  (contendo credenciais do GitHub e o conteúdo Markdown do README) como entrada. Ele cria uma instância de `GitHubCommitter`, utilizando as credenciais fornecidas na requisição, e utiliza esta instância para enviar o conteúdo do README para o repositório especificado. Retorna uma mensagem de sucesso ou um erro interno em caso de falha.  A mensagem de commit é fixa ("Docs: Atualiza README.md via API Gilgamesh").
 
 ### src/main/java/gilgamesh/dto/CommitRequest.java
-Resumo:
-Resumo:
-A classe CommitRequest é responsável por representar um pedido de commit no GitHub, contendo informações como o nome de usuário, nome do repositório, token do GitHub e conteúdo em formato markdown. Ela possui métodos getters e setters para acessar e modificar essas informações.
+A classe `CommitRequest` representa uma requisição para realizar um commit em um repositório GitHub.  Ela encapsula os dados necessários para essa operação.
+
+**Responsabilidades:**
+
+Armazenar e fornecer acesso aos dados de uma requisição de commit, incluindo:
+
+* **username:** O nome de usuário do GitHub.
+* **repositoryName:** O nome do repositório GitHub.
+* **githubToken:** O token de acesso do GitHub.
+* **markdownContent:** O conteúdo do commit em formato Markdown.
+
+
+**Métodos Principais:**
+
+A classe possui apenas getters e setters para cada um dos atributos, permitindo o acesso e a modificação dos dados da requisição.  Não há métodos com lógica de negócio específica dentro da classe.
 
 ### src/main/java/gilgamesh/dto/DocumentationRequest.java
-Resumo:
-Resumo:
-
-A classe DocumentationRequest é responsável por representar uma solicitação de documentação, contendo as informações do usuário, nome do repositório e token do GitHub. 
-
-Métodos da Classe:
-- getUsername(): retorna o nome de usuário associado à solicitação de documentação.
-- setUsername(String username): define o nome de usuário associado à solicitação de documentação.
-- getRepositoryName(): retorna o nome do repositório associado à solicitação de documentação.
-- setRepositoryName(String repositoryName): define o nome do repositório associado à solicitação de documentação.
-- getGithubToken(): retorna o token do GitHub associado à solicitação de documentação.
-- setGithubToken(String githubToken): define o token do GitHub associado à solicitação de documentação.
+A classe `DocumentationRequest` serve como um objeto de transferência de dados (DTO) que encapsula informações necessárias para uma requisição de documentação.  Ela possui três atributos principais: `username` (nome de usuário), `repositoryName` (nome do repositório) e `githubToken` (token do GitHub).  Os métodos públicos são apenas getters e setters para esses atributos, permitindo acesso e modificação dos dados.  Em resumo, a classe facilita a passagem organizada dessas informações para outras partes do sistema.
 
 ### src/main/java/gilgamesh/service/CodeDocumenterService.java
-Resumo:
-Resumo da Classe CodeDocumenterService:
+A classe `CodeDocumenterService` utiliza a API OpenAI para gerar documentação de código Java.  Seus métodos principais são:
 
-- A classe CodeDocumenterService é responsável por gerar documentação para códigos Java utilizando um modelo de Chat.
+* **`CodeDocumenterService(String openAiApiKey)`:** Construtor da classe. Recebe a chave de API do OpenAI e configura um modelo de chat `gpt-3.5-turbo` para gerar a documentação.
 
-Método generateDocumentation:
-- Responsabilidade: Gera a documentação para uma lista de arquivos Java (conteúdo do código).
-- Parâmetro: Lista de strings com o código completo de cada arquivo Java.
-- Retorno: Documentação gerada pela LLM (Modelo de Linguagem).
-- Funcionamento: Monta um prompt com o conteúdo dos arquivos Java, envia para o modelo de Chat e retorna a resposta.
+* **`generateDocumentation(List<String> javaFileContents)`:**  Recebe uma lista de strings, onde cada string representa o conteúdo de um arquivo Java.  Concatena todos os códigos em um único prompt e o envia para o modelo de linguagem, retornando a documentação gerada como uma única string. A documentação abrange todos os arquivos fornecidos.
 
-Método summarizeFilesIndividually:
-- Responsabilidade: Gera um resumo das responsabilidades da classe e seus métodos para cada arquivo Java individualmente.
-- Parâmetro: Mapa contendo o conteúdo dos arquivos Java mapeados pelo nome do arquivo.
-- Retorno: Mapa contendo o nome do arquivo e o resumo gerado para cada um.
-- Funcionamento: Cria um prompt para cada arquivo Java, envia para o modelo de Chat e armazena o resumo gerado no mapa de resumos.
+* **`summarizeFilesIndividually(Map<String, String> fileContentsByPath)`:** Recebe um mapa onde a chave é o caminho do arquivo e o valor é o conteúdo do arquivo Java.  Para cada arquivo, gera um prompt contendo o nome do arquivo e seu conteúdo, solicitando um resumo da classe e seus métodos. Retorna um mapa onde a chave é o nome do arquivo e o valor é o resumo da documentação gerada individualmente para cada arquivo.
 
 ### src/main/java/gilgamesh/service/DocumentationService.java
-Resumo:
-Resumo da Classe DocumentationService:
+A classe `DocumentationService` é responsável por gerar automaticamente a seção de documentação para um repositório, a ser inserida no arquivo `README.md`.  Ela utiliza a API OpenAI para gerar resumos de código Java.
 
-Responsabilidades:
-- Orquestrar o processo de geração de documentação para um repositório.
-- Injetar a chave da API do arquivo application.properties.
+**Métodos principais:**
 
-Métodos:
-- generateDocumentationForRepository(DocumentationRequest request): Orquestra o processo de geração de documentação para um repositório, buscando os arquivos Java do repositório, gerando resumos para cada arquivo e construindo a seção do README.
-- buildReadmeSection(Map<String, String> summaries): Constrói a seção de documentação automática com base nos resumos fornecidos.
+* **`generateDocumentationForRepository(DocumentationRequest request)`:** Este método é o principal ponto de entrada. Ele recebe um objeto `DocumentationRequest` contendo informações de acesso ao GitHub (usuário, nome do repositório e token) e realiza as seguintes etapas:
+    1. Baixa todos os arquivos Java do repositório especificado utilizando a classe `GitHubCodeFetcher`.
+    2. Gera um resumo para cada arquivo Java usando a classe `CodeDocumenterService`, que por sua vez utiliza a API OpenAI.
+    3. Constrói uma string formatada para inclusão no `README.md`, contendo os resumos gerados, usando o método `buildReadmeSection`.  Retorna esta string como resultado.  Lança uma exceção `IOException` caso haja algum problema na comunicação com o GitHub.
+
+* **`buildReadmeSection(Map<String, String> summaries)`:**  Este método privado formata os resumos gerados (recebidos como um mapa onde a chave é o caminho do arquivo e o valor é o resumo) em uma string para ser adicionada à seção de documentação do arquivo `README.md`.  A saída inclui um cabeçalho e lista cada arquivo com seu respectivo resumo.
 
 ### src/main/java/gilgamesh/service/GitHubCodeFetcher.java
-Resumo:
-Resumo da classe GitHubCodeFetcher:
+A classe `GitHubCodeFetcher` é responsável por buscar arquivos Java de um repositório GitHub.
 
-A classe GitHubCodeFetcher é responsável por buscar e recuperar arquivos Java de um repositório do GitHub.
+**Responsabilidades:**
 
-Métodos:
-- Construtor GitHubCodeFetcher: recebe um token de autenticação do GitHub, o dono do repositório e o nome do repositório como parâmetros. Inicializa a instância do GitHub com o token fornecido e obtém o repositório especificado.
-- fetchAllJavaFiles: recebe o dono do repositório e o nome do repositório como parâmetros e retorna um mapa contendo o caminho e o conteúdo de todos os arquivos Java do repositório. Chama o método fetchJavaFilesRecursive para percorrer de forma recursiva os diretórios do repositório.
-- fetchJavaFilesRecursive: método privado que recebe uma lista de conteúdos do repositório e um mapa para armazenar os arquivos Java encontrados. Itera sobre os conteúdos verificando se são arquivos Java e os armazena no mapa, ou se são diretórios e chama recursivamente o método para buscar arquivos dentro deles.
+* Conecta-se à API do GitHub utilizando um token de acesso.  Trata erros de token inválido. Configura um tempo limite para conexão e leitura.
+* Recupera um repositório específico do GitHub, dado o nome do dono e do repositório.
+* Busca recursivamente todos os arquivos Java dentro do repositório.
+
+**Métodos Principais:**
+
+* **`GitHubCodeFetcher(String token, String owner, String repoName)`:** Construtor da classe. Recebe o token de acesso do GitHub, o nome do dono do repositório e o nome do repositório como parâmetros.  Lança uma exceção `IllegalArgumentException` se o token for inválido e `IOException` caso ocorra um erro de conexão.
+
+* **`fetchAllJavaFiles(String owner, String repoName)`:** Busca todos os arquivos `.java` no repositório especificado (através dos parâmetros `owner` e `repoName`) e retorna um mapa onde a chave é o caminho do arquivo e o valor é o conteúdo do arquivo. Retorna um `LinkedHashMap` para preservar a ordem. Lança `IOException` caso ocorra um erro durante a busca.
+
+* **`fetchJavaFilesRecursive(List<GHContent> contents, Map<String, String> javaFiles)`:** Método recursivo auxiliar que percorre a estrutura de diretórios do repositório, buscando e adicionando os arquivos Java encontrados ao mapa `javaFiles`.  Lança `IOException` caso ocorra um erro.
 
 ### src/main/java/gilgamesh/service/GitHubCommitter.java
-Resumo:
-Resumo da classe GitHubCommitter:
-- A classe GitHubCommitter é responsável por interagir com o serviço do GitHub para criar ou atualizar o arquivo README.md de um repositório.
-- Ela possui um construtor que inicializa a conexão com o GitHub utilizando um token de acesso e o nome do proprietário e do repositório.
-- O método createOrUpdateReadme cria ou atualiza o arquivo README.md com base em uma lista de sumários fornecidos. O conteúdo do arquivo é gerado automaticamente com base nos sumários.
-- O método commitReadme permite criar ou atualizar o arquivo README.md com um conteúdo fornecido e uma mensagem de commit.
-- Os métodos buildReadmeSection e updateAutoDocSection são métodos auxiliares para construir e atualizar as seções de documentação no arquivo README.md. O updateAutoDocSection substitui a seção de documentação existente com a nova seção.
+A classe `GitHubCommitter` é responsável por interagir com a API do GitHub para criar ou atualizar o arquivo `README.md` de um repositório.  Ela utiliza a biblioteca `org.kohsuke.github` para essa comunicação.
+
+**Métodos principais:**
+
+* **`GitHubCommitter(String githubToken, String owner, String repoName)`:** Construtor da classe. Recebe o token de acesso do GitHub, o nome do dono do repositório e o nome do repositório como parâmetros.  Inicializa a conexão com o repositório especificado. Lança `IOException` em caso de erro.
+
+* **`createOrUpdateReadme(Map<String, String> fileSummaries)`:**  **(DEPRECATED)** Método depreciado, mantido apenas para referência.  Sua funcionalidade foi movida para outro serviço.  Criava ou atualizava a seção de documentação automática no arquivo `README.md` baseado em um mapa de resumos de arquivos.
+
+* **`commitReadme(String readmeContent, String commitMessage)`:**  Cria ou atualiza o arquivo `README.md` com o conteúdo de texto fornecido (`readmeContent`) e uma mensagem de commit (`commitMessage`).  Trata a criação e atualização do arquivo, lidando com a possibilidade de o arquivo já existir ou não. Lança `IOException` em caso de erro.
+
+**Métodos auxiliares (privados):**
+
+* **`buildReadmeSection(Map<String, String> summaries)`:** Constrói a seção de documentação automática para o `README.md` a partir de um mapa de resumos.
+
+* **`updateAutoDocSection(String currentContent, String newSection)`:** Atualiza uma seção específica dentro do conteúdo existente do `README.md`.  Atualmente, não possui marcadores definidos, tornando sua funcionalidade limitada.
+
+
+Em resumo, a classe simplifica a interação com o GitHub para gerenciar o conteúdo do arquivo `README.md`, oferecendo métodos para criar e atualizar seu conteúdo de forma controlada e robusta. O método `commitReadme` é o método principal e atualizado para essa funcionalidade.
+
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+
