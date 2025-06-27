@@ -1,44 +1,22 @@
 package gilgamesh.service;
 
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.openai.OpenAiChatModel;
+import dev.langchain4j.model.chat.ChatLanguageModel;
+// Importação do modelo do Google Gemini
+import dev.langchain4j.model.google.GoogleAiChatModel;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CodeDocumenterService {
 
-    private final ChatModel chatModel;
+    private final ChatLanguageModel model;
 
-    public CodeDocumenterService(String openAiApiKey) {
-        this.chatModel = OpenAiChatModel.builder()
-                .apiKey(openAiApiKey)
-                .modelName("gpt-3.5-turbo")
+    // O construtor agora recebe a chave do Gemini
+    public CodeDocumenterService(String geminiApiKey) {
+        this.model = GoogleAiChatModel.builder()
+                .apiKey(geminiApiKey)
+                .modelName("gemini-pro") // ou outro modelo como "gemini-1.5-flash"
                 .build();
-    }
-
-    /**
-     * Gera a documentação para uma lista de arquivos Java (conteúdo do código).
-     * @param javaFileContents Lista de strings, cada uma com o código completo de um arquivo Java.
-     * @return Documentação gerada pela LLM.
-     */
-    public String generateDocumentation(List<String> javaFileContents) {
-        // Montar prompt com o conteúdo dos arquivos
-        StringBuilder promptBuilder = new StringBuilder();
-        promptBuilder.append("Você é um assistente que gera documentação para códigos Java.\n");
-        promptBuilder.append("Para os códigos abaixo, gere uma documentação clara e objetiva explicando classes e métodos.\n\n");
-
-        for (String fileContent : javaFileContents) {
-            promptBuilder.append(fileContent).append("\n\n");
-        }
-
-        promptBuilder.append("Por favor, faça a documentação de forma detalhada.");
-
-        // Enviar prompt para a LLM e obter resposta
-        String response = chatModel.chat(promptBuilder.toString());
-
-        return response;
     }
 
     public Map<String, String> summarizeFilesIndividually(Map<String, String> fileContentsByPath) {
@@ -50,14 +28,14 @@ public class CodeDocumenterService {
 
             String prompt = String.format(
                     "Você é um assistente que documenta códigos Java.\n"
-                            + "Analise o seguinte código e gere um resumo com as responsabilidades da classe e seus métodos:\n\n"
-                            + "Arquivo: %s\n\n%s", fileName, code);
+                            + "Analise o seguinte código e gere um resumo com as responsabilidades da classe e seus métodos principais em português claro e objetivo:\n\n"
+                            + "Arquivo: %s\n\n```java\n%s\n```", fileName, code);
 
-            String summary = chatModel.chat(prompt);
+            // A chamada para o modelo permanece a mesma
+            String summary = model.generate(prompt);
             summaries.put(fileName, summary.trim());
         }
 
         return summaries;
     }
-
 }
