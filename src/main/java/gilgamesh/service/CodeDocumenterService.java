@@ -1,21 +1,20 @@
 package gilgamesh.service;
-
-import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 // Importação do modelo do Google Gemini
-import dev.langchain4j.model.google.GoogleAiChatModel;
+import dev.langchain4j.model.chat.ChatModel;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class CodeDocumenterService {
 
-    private final ChatLanguageModel model;
+    private final ChatModel model;
 
     // O construtor agora recebe a chave do Gemini
     public CodeDocumenterService(String geminiApiKey) {
-        this.model = GoogleAiChatModel.builder()
+        this.model = GoogleAiGeminiChatModel.builder()
                 .apiKey(geminiApiKey)
-                .modelName("gemini-pro") // ou outro modelo como "gemini-1.5-flash"
+                .modelName("gemini-2.5-flash") // ou outro modelo como "gemini-1.5-flash"
                 .build();
     }
 
@@ -32,7 +31,7 @@ public class CodeDocumenterService {
                             + "Arquivo: %s\n\n```java\n%s\n```", fileName, code);
 
             // A chamada para o modelo permanece a mesma
-            String summary = model.generate(prompt);
+            String summary = model.chat(prompt);
             summaries.put(fileName, summary.trim());
         }
 
