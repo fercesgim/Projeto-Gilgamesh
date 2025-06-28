@@ -14,7 +14,7 @@ public class CodeDocumenterService {
     public CodeDocumenterService(String geminiApiKey) {
         this.model = GoogleAiGeminiChatModel.builder()
                 .apiKey(geminiApiKey)
-                .modelName("gemini-2.5-flash") // ou outro modelo como "gemini-1.5-flash"
+                .modelName("gemini-1.5-flash") // ou outro modelo como "gemini-1.5-flash"
                 .build();
     }
 
@@ -27,7 +27,7 @@ public class CodeDocumenterService {
 
             String prompt = String.format(
                     "Você é um assistente que documenta códigos Java.\n"
-                            + "Analise o seguinte código e gere um resumo com as responsabilidades da classe e seus métodos principais em português claro e objetivo:\n\n"
+                            + "Analise o seguinte código e gere um resumo com as responsabilidades da classe e seus métodos principais em português claro e objetivo usando emoticons para ilustrar:\n\n"
                             + "Arquivo: %s\n\n```java\n%s\n```", fileName, code);
 
             // A chamada para o modelo permanece a mesma
